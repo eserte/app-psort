@@ -32,7 +32,11 @@ usage: $0 [-n] [-r] -e ...
 EOF
 
 my @data;
-my $cb = defined $perlscript ? eval "sub { $perlscript }" : sub { $_ };
+my $cb = defined $perlscript ? do {
+    my $sub = eval "sub { $perlscript }";
+    die $@ if $@;
+    $sub;
+} : sub { $_ };
 
 if (@ARGV) {
     for my $file (@ARGV) {
