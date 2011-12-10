@@ -1,0 +1,7 @@
+bin/psort
+lib/App/psort.pm
+Makefile.PL
+MANIFEST
+MANIFEST.SKIP
+t/psort.t
+t/version_check.t
