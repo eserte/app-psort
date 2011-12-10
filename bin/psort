@@ -15,6 +15,9 @@
 use strict;
 use Getopt::Long;
 
+use vars qw($VERSION);
+$VERSION = "0.01";
+
 my $sort_type = 'alpha';
 my $reverse;
 my $perlscript;
@@ -30,6 +33,10 @@ GetOptions(
 	   "e|perlcode=s" => \$perlscript,
 	   'M|module=s@'  => \@modules,
 	   "C|cmp=s"      => \$cmp_perlscript,
+	   "v"            => sub {
+	       print "psort $VERSION\n";
+	       exit 0;
+	   },
 	  ) or die <<EOF;
 usage: $0 [-n | -N | -V] [-r] -e ...
 
