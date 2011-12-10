@@ -1,0 +1,6 @@
+/.prove
+/App-psort-*.tar.gz
+/Makefile
+/Makefile.old
+/blib
+/pm_to_blib
