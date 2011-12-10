@@ -40,7 +40,7 @@ GetOptions(
 	   "e|field-function=s"   => \$perlscript,
 	   'M|module=s@'          => \@modules,
 	   "v|version"            => sub {
-	       print "psort $VERSION\n";
+	       print "psort version $VERSION\n";
 	       exit 0;
 	   },
 	  ) or die <<EOF;
