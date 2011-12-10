@@ -26,23 +26,24 @@ my $cmp_perlscript;
 
 Getopt::Long::Configure("bundling");
 GetOptions(
-	   "n|numeric"    => sub { $sort_type = 'numeric' },
-	   "N|naturally"  => sub { $sort_type = 'sort_naturally' },
-	   "V|version"    => sub { $sort_type = 'version' },
-	   "r|reverse"    => \$reverse,
-	   "e|perlcode=s" => \$perlscript,
-	   'M|module=s@'  => \@modules,
-	   "C|cmp=s"      => \$cmp_perlscript,
-	   "v"            => sub {
+	   "n|numeric-sort"       => sub { $sort_type = 'numeric' },
+	   "N|natural-sort"       => sub { $sort_type = 'sort_naturally' },
+	   "V|version-sort"       => sub { $sort_type = 'version' },
+	   "C|compare-function=s" => \$cmp_perlscript,
+	   "r|reverse"            => \$reverse,
+	   "e|field-function=s"   => \$perlscript,
+	   'M|module=s@'          => \@modules,
+	   "v|version"            => sub {
 	       print "psort $VERSION\n";
 	       exit 0;
 	   },
 	  ) or die <<EOF;
-usage: $0 [-n | -N | -V] [-r] -e ...
+usage: $0 [-n | -N | -V | -C ...] [-r] -e ...
 
 -n: compare numerically
 -N: compare using Sort::Naturally
 -V: compare versions
+-C: compare using any perl code ($a and $b are defined)
 -r: reverse sorting
 -e: perl oneliner, should return the value to be compared as last value
 -M: add perl modules
@@ -134,3 +135,31 @@ sub add_psort {
 }
 
 __END__
+
+=head1 NAME
+
+psort - a perl-enhanced sort
+
+=head1 SYNOPSIS
+
+    psort [-n | -N | -V | -C '$a cmp $b'] [-r] -e '/...(...).../ && $1'
+
+=head1 AUTHOR
+
+Slaven ReziE<x0107>
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (C) 2009,2011 by Slaven ReziE<x0107>
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself, either Perl version 5.8.8 or,
+at your option, any later version of Perl 5 you may have available.
+
+=head1 SEE ALSO
+
+L<sort(1)>, L<Sort::Naturally>.
+
+=cut
+
+
