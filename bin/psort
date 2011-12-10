@@ -15,26 +15,52 @@
 use strict;
 use Getopt::Long;
 
-my $numeric;
+my $sort_type = 'alpha';
 my $reverse;
 my $perlscript;
+my @modules;
+my $cmp_perlscript;
 
 Getopt::Long::Configure("bundling");
-GetOptions("n"   => \$numeric,
-	   "r"   => \$reverse,
-	   "e=s" => \$perlscript,
+GetOptions(
+	   "n|numeric"    => sub { $sort_type = 'numeric' },
+	   "N|naturally"  => sub { $sort_type = 'sort_naturally' },
+	   "V|version"    => sub { $sort_type = 'version' },
+	   "r|reverse"    => \$reverse,
+	   "e|perlcode=s" => \$perlscript,
+	   'M|module=s@'  => \@modules,
+	   "C|cmp=s"      => \$cmp_perlscript,
 	  ) or die <<EOF;
-usage: $0 [-n] [-r] -e ...
+usage: $0 [-n | -N | -V] [-r] -e ...
 
 -n: compare numerically
+-N: compare using Sort::Naturally
+-V: compare versions
 -r: reverse sorting
 -e: perl oneliner, should return the value to be compared as last value
+-M: add perl modules
 EOF
+
+if ($cmp_perlscript) {
+    $sort_type = eval "sub { $cmp_perlscript }";
+    die "Cannot compile 'cmp' code: $@" if $@;
+}
+
+for my $module_spec (@modules) {
+    my($module,$imports) = split /=/, $module_spec, 2;
+    eval qq{require $module};
+    die $@ if $@;
+    my @imports;
+    if (defined $imports) {
+	@imports = split /,/, $imports;
+	$module->import(@imports);
+    }
+}
 
 my @data;
 my $cb = defined $perlscript ? do {
     my $sub = eval "sub { $perlscript }";
-    die $@ if $@;
+    die "Cannot compile code: $@" if $@;
     $sub;
 } : sub { $_ };
 
@@ -46,20 +72,45 @@ if (@ARGV) {
     add_psort(\*STDIN);
 }
 
-if ($numeric) {
+if ($sort_type eq 'numeric') {
     no warnings 'numeric', 'uninitialized';
     if ($reverse) {
 	@data = sort { $b->[1] <=> $a->[1] } @data;
     } else {
 	@data = sort { $a->[1] <=> $b->[1] } @data;
     }
-} else {
+} elsif ($sort_type eq 'alpha') {
     no warnings 'uninitialized';
     if ($reverse) {
 	@data = sort { $b->[1] cmp $a->[1] } @data;
     } else {
 	@data = sort { $a->[1] cmp $b->[1] } @data;
     }
+} elsif ($sort_type eq 'sort_naturally') {
+    require Sort::Naturally;
+    no warnings 'uninitialized';
+    if ($reverse) {
+	@data = sort { Sort::Naturally::ncmp($b->[1], $a->[1]) } @data;
+    } else {
+	@data = sort { Sort::Naturally::ncmp($a->[1], $b->[1]) } @data;
+    }
+} elsif ($sort_type eq 'version') {
+    require CPAN::Version;
+    no warnings 'uninitialized';
+    if ($reverse) {
+	@data = sort { CPAN::Version->vcmp($b->[1], $a->[1]) } @data;
+    } else {
+	@data = sort { CPAN::Version->vcmp($a->[1], $b->[1]) } @data;
+    }
+} elsif (UNIVERSAL::isa($sort_type, 'CODE')) {
+    no warnings 'uninitialized';
+    if ($reverse) {
+	@data = sort { local($a, $b) = ($b->[1], $a->[1]); $sort_type->() } @data;
+    } else {
+	@data = sort { local($a, $b) = ($a->[1], $b->[1]); $sort_type->() } @data;
+    }
+} else {
+    die "Unhandled sort type '$sort_type'";
 }
 
 for (@data) {
