@@ -18,7 +18,7 @@ BEGIN {
 	exit;
     }
 
-    *eq_or_diff = eval { require Test::Differences; \&Test::Differences::eq_or_diff } || \&Test::More::eq;
+    *eq_or_diff = eval { require Test::Differences; \&Test::Differences::eq_or_diff } || \&Test::More::is;
 }
 
 my $psort = "$FindBin::RealBin/../blib/script/psort";
