@@ -20,6 +20,9 @@ $VERSION = "0.01";
 
 my $sort_type = 'alpha';
 my $reverse;
+my $ignore_leading_blanks;
+my $ignore_case;
+my $ignore_nonprinting;
 my $perlscript;
 my @modules;
 my $cmp_perlscript;
@@ -30,6 +33,9 @@ GetOptions(
 	   "N|natural-sort"       => sub { $sort_type = 'sort_naturally' },
 	   "V|version-sort"       => sub { $sort_type = 'version' },
 	   "C|compare-function=s" => \$cmp_perlscript,
+	   "b|ignore-leading-blanks" => \$ignore_leading_blanks,
+	   "f|ignore-case"        => \$ignore_case,
+	   "i|ignore-nonprinting" => \$ignore_nonprinting,
 	   "r|reverse"            => \$reverse,
 	   "e|field-function=s"   => \$perlscript,
 	   'M|module=s@'          => \@modules,
@@ -130,6 +136,9 @@ sub add_psort {
     while(<$fh>) {
 	my $line = $_;
 	my $res = $cb->($_); # force scalar context
+	$res = lc $res            if $ignore_case;
+	$res =~ s{^\s+}{}         if $ignore_leading_blanks;
+	$res =~ s{[[:^print]]}{}g if $ignore_nonprinting;
 	push @data, [$line, $res];
     }
 }
