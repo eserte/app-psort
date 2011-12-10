@@ -263,21 +263,21 @@ sub _run_psort {
 	    }
 	    $cmd_res = close $fh;
 	}
-    }
 
-    if ($expect_error) {
-	ok !$cmd_res, 'Expected failure'
-	    or diag "While running '@cmd'";
-    } else {
-	ok $cmd_res, 'Expected success'
-	    or diag "While running '@cmd': $?";
-    }
+	if ($expect_error) {
+	    ok !$cmd_res, 'Expected failure'
+		or diag "While running '@cmd'";
+	} else {
+	    ok $cmd_res, 'Expected success'
+		or diag "While running '@cmd': $?";
+	}
 
-    my $testlabel = !defined $args ? '<no args>' : "args: <@$args>";
-    if (ref $expected eq 'Regexp') {
-	like $buf, $expected, $testlabel;
-    } else {
-	eq_or_diff $buf, $expected, $testlabel;
+	my $testlabel = !defined $args ? '<no args>' : "args: <@$args>";
+	if (ref $expected eq 'Regexp') {
+	    like $buf, $expected, $testlabel;
+	} else {
+	    eq_or_diff $buf, $expected, $testlabel;
+	}
     }
 }
 
