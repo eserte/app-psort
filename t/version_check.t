@@ -24,7 +24,7 @@ use App::psort;
 
 my $psort = "$FindBin::RealBin/../blib/script/psort";
 
-my($script_version) = `$psort --version` =~ m{(\d+\.\d+)};
+my($script_version) = `$psort --version` =~ m{version\s+(\S+)};
 
 is $script_version, $App::psort::VERSION, 'Script and module version are the same';
 

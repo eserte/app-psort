@@ -213,7 +213,7 @@ b
 c
 EOF
 
-     [["-v"], "", qr{^psort version \d+\.\d+$}],
+     [["-v"], "", qr{^psort version \d+\.\d+(?:_\d+)?$}],
 
     );
 
