@@ -49,7 +49,7 @@ usage: $0 [-n | -N | -V | -C ...] [-r] -e ...
 -n: compare numerically
 -N: compare using Sort::Naturally
 -V: compare versions
--C: compare using any perl code ($a and $b are defined)
+-C: compare using any perl code (\$a and \$b are defined)
 -r: reverse sorting
 -e: perl oneliner, should return the value to be compared as last value
 -M: add perl modules
