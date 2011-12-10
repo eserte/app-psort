@@ -1,0 +1,45 @@
+use strict;
+use ExtUtils::MakeMaker;
+
+my $is_devel_host = defined $ENV{USER} && $ENV{USER} eq 'eserte' && $^O =~ /bsd/i && -f "../../perl.release.mk";
+my $eumm_recent_enough = $ExtUtils::MakeMaker::VERSION >= 6.54;
+
+if (!$eumm_recent_enough) {
+    *MY::dist_core = sub {
+	<<'EOF';
+dist :
+	$(NOECHO) $(ECHO) "Sorry, use a newer EUMM!"
+
+EOF
+    };
+}
+
+WriteMakefile(
+    NAME              => 'App::psort',
+    VERSION_FROM      => 'bin/psort',
+    PREREQ_PM         => {
+	'Sort::Naturally'	=> 0, # but may also work without
+    },
+    EXE_FILES         => ['bin/psort'],
+    LICENSE	      => 'perl',
+    ($] >= 5.005 ?
+      (ABSTRACT_FROM  => 'bin/psort',
+       AUTHOR         => 'Slaven Rezic <srezic@cpan.org>') : ()),
+    ($eumm_recent_enough ?
+      (META_ADD => { resources => { repository => 'git://github.com/eserte/app-psort.git' } }) : ()),
+);
+
+sub MY::postamble {
+    my $postamble = '';
+
+    if ($is_devel_host) {
+	$postamble .= <<'EOF';
+
+.include "../../perl.release.mk"
+.include "../../perl.git.mk"
+
+EOF
+    }
+
+    $postamble;
+}
