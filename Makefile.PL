@@ -18,7 +18,8 @@ WriteMakefile(
     NAME              => 'App::psort',
     VERSION_FROM      => 'bin/psort',
     PREREQ_PM         => {
-	'Sort::Naturally'	=> 0, # but may also work without
+	'Sort::Naturally'	=> 0, # but may also work without, sans the -N switch
+	'CPAN::Version'		=> 0, # but may also work without, sans the -V switch
     },
     EXE_FILES         => ['bin/psort'],
     LICENSE	      => 'perl',
