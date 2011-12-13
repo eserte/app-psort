@@ -260,7 +260,7 @@ sub _run_psort {
 
     my @sort_cmd  = ($psort, @$args, $tmpfile);
 
-    my $buf;
+    my $buf = ''; # empty file = empty string!
     my $cmd_res;
 
  SKIP: {
