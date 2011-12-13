@@ -20,6 +20,7 @@ $VERSION = "0.01_54";
 
 my $sort_type = 'alpha';
 my $reverse;
+my $check;
 my $ignore_leading_blanks;
 my $ignore_case;
 my $ignore_nonprinting;
@@ -37,6 +38,7 @@ GetOptions(
 	   "f|ignore-case"        => \$ignore_case,
 	   "i|ignore-nonprinting" => \$ignore_nonprinting,
 	   "r|reverse"            => \$reverse,
+	   "c|check"              => \$check,
 	   "e|field-function=s"   => \$perlscript,
 	   'M|module=s@'          => \@modules,
 	   "v|version"            => sub {
@@ -105,19 +107,39 @@ if ($sort_type eq 'numeric') {
     die "Unhandled sort type '$sort_type'";
 }
 
-my $code = $sort_preamble;
-$code .= '@data = sort { ';
-if ($reverse) {
-    $code .= $sort_creator->('$b->[1]', '$a->[1]');
+if ($check) {
+    exit 0 if !@data;
+    my $code = $sort_preamble;
+    $code .= 'sub { ';
+    if ($reverse) {
+	$code .= $sort_creator->('$_[1]->[1]', '$_[0]->[1]');
+    } else {
+	$code .= $sort_creator->('$_[0]->[1]', '$_[1]->[1]');
+    }
+    $code .= '}';
+    my $check_sub = eval $code;
+    die "Error while evaluating '$code': $@" if $@;
+    for(my $i=1; $i<=$#data; $i++) {
+	if ($check_sub->($data[$i-1], $data[$i]) > 0) {
+	    exit 1;
+	}
+    }
+    exit 0;
 } else {
-    $code .= $sort_creator->('$a->[1]', '$b->[1]');
-}
-$code .= ' } @data';
-eval $code;
-die $@ if $@;
+    my $code = $sort_preamble;
+    $code .= '@data = sort { ';
+    if ($reverse) {
+	$code .= $sort_creator->('$b->[1]', '$a->[1]');
+    } else {
+	$code .= $sort_creator->('$a->[1]', '$b->[1]');
+    }
+    $code .= ' } @data';
+    eval $code;
+    die "Error while evaluating '$code': $@" if $@;
 
-for (@data) {
-    print $_->[0];
+    for (@data) {
+	print $_->[0];
+    }
 }
 
 sub add_psort {
