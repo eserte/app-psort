@@ -86,46 +86,35 @@ if (@ARGV) {
     add_psort(\*STDIN);
 }
 
+my $sort_preamble = q{no warnings 'uninitialized';};
+my $sort_creator;
 if ($sort_type eq 'numeric') {
-    no warnings 'numeric', 'uninitialized';
-    if ($reverse) {
-	@data = sort { $b->[1] <=> $a->[1] } @data;
-    } else {
-	@data = sort { $a->[1] <=> $b->[1] } @data;
-    }
+    $sort_preamble = q{no warnings 'numeric', 'uninitialized';};
+    $sort_creator = sub { $_[0] . ' <=> ' . $_[1] };
 } elsif ($sort_type eq 'alpha') {
-    no warnings 'uninitialized';
-    if ($reverse) {
-	@data = sort { $b->[1] cmp $a->[1] } @data;
-    } else {
-	@data = sort { $a->[1] cmp $b->[1] } @data;
-    }
+    $sort_creator = sub { $_[0] . ' cmp ' . $_[1] };
 } elsif ($sort_type eq 'sort_naturally') {
     require Sort::Naturally;
-    no warnings 'uninitialized';
-    if ($reverse) {
-	@data = sort { Sort::Naturally::ncmp($b->[1], $a->[1]) } @data;
-    } else {
-	@data = sort { Sort::Naturally::ncmp($a->[1], $b->[1]) } @data;
-    }
+    $sort_creator = sub { 'Sort::Naturally::ncmp(' . $_[0] . ', ' . $_[1] . ')' };
 } elsif ($sort_type eq 'version') {
     require CPAN::Version;
-    no warnings 'uninitialized';
-    if ($reverse) {
-	@data = sort { CPAN::Version->vcmp($b->[1], $a->[1]) } @data;
-    } else {
-	@data = sort { CPAN::Version->vcmp($a->[1], $b->[1]) } @data;
-    }
+    $sort_creator = sub { 'CPAN::Version->vcmp(' . $_[0] . ', ' . $_[1] . ')' };
 } elsif (UNIVERSAL::isa($sort_type, 'CODE')) {
-    no warnings 'uninitialized';
-    if ($reverse) {
-	@data = sort { local($a, $b) = ($b->[1], $a->[1]); $sort_type->() } @data;
-    } else {
-	@data = sort { local($a, $b) = ($a->[1], $b->[1]); $sort_type->() } @data;
-    }
+    $sort_creator = sub { 'local($a, $b) = (' . $_[0] . ', ' . $_[1] . '); $sort_type->()' };
 } else {
     die "Unhandled sort type '$sort_type'";
 }
+
+my $code = $sort_preamble;
+$code .= '@data = sort { ';
+if ($reverse) {
+    $code .= $sort_creator->('$b->[1]', '$a->[1]');
+} else {
+    $code .= $sort_creator->('$a->[1]', '$b->[1]');
+}
+$code .= ' } @data';
+eval $code;
+die $@ if $@;
 
 for (@data) {
     print $_->[0];
