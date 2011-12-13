@@ -24,8 +24,12 @@ BEGIN {
 my $psort = "$FindBin::RealBin/../blib/script/psort";
 
 my @test_defs =
-    (
-     [undef, <<EOF, <<EOF],
+    (# options
+     #       in
+     #              out (expected)
+     #                     --check(able)
+     #                        in is unsorted
+     [undef, <<EOF, <<EOF, 1, 1],
 c
 b
 a
@@ -35,7 +39,7 @@ b
 c
 EOF
 
-     [["-r"], <<EOF, <<EOF],
+     [["-r"], <<EOF, <<EOF, 1, 0],
 c
 b
 a
@@ -45,7 +49,7 @@ b
 a
 EOF
 
-     [["-f"], <<EOF, <<EOF],
+     [["-f"], <<EOF, <<EOF, 1, 1],
 C
 b
 A
@@ -55,7 +59,7 @@ b
 C
 EOF
 
-     [["-bf"], <<EOF, <<EOF],
+     [["-bf"], <<EOF, <<EOF, 1, 1],
  C
   b
 A
@@ -65,7 +69,7 @@ A
  C
 EOF
 
-     [["-n"], <<EOF, <<EOF],
+     [["-n"], <<EOF, <<EOF, 1, 1],
 111
 22
 3
@@ -75,7 +79,7 @@ EOF
 111
 EOF
 
-     [["-n", "-r"], <<EOF, <<EOF],
+     [["-n", "-r"], <<EOF, <<EOF, 1, 0],
 111
 22
 3
@@ -85,7 +89,7 @@ EOF
 3
 EOF
 
-     [['-N', '-f'], <<EOF, <<EOF],
+     [['-N', '-f'], <<EOF, <<EOF, 1, 1],
 foo12a
 foo12z
 foo13a
@@ -113,7 +117,7 @@ EOF
 
      # same like -N -f, but manually use'ing the module and defining
      # the compare function
-     [['-MSort::Naturally=ncmp', '-C', 'ncmp($a, $b)', '-f'], <<EOF, <<EOF],
+     [['-MSort::Naturally=ncmp', '-C', 'ncmp($a, $b)', '-f'], <<EOF, <<EOF, 1, 1],
 foo12a
 foo12z
 foo13a
@@ -139,7 +143,7 @@ foo12z
 foo13a
 EOF
 
-     [['-N', '-r'], <<EOF, <<EOF],
+     [['-N', '-r'], <<EOF, <<EOF, 1, 1],
 foo12a
 foo12z
 foo13a
@@ -161,7 +165,7 @@ foo
 9x
 EOF
 
-     [["-V"], <<EOF, <<EOF],
+     [["-V"], <<EOF, <<EOF, 1, 1],
 1.0
 2.3.0
 1.1.5.1
@@ -177,7 +181,7 @@ EOF
 20
 EOF
 
-     [["-Vr"], <<EOF, <<EOF],
+     [["-Vr"], <<EOF, <<EOF, 1, 1],
 1.0
 2.3.0
 1.1.5.1
@@ -193,7 +197,7 @@ EOF
 1.0
 EOF
 
-     [["-e", 'm{(\d+) wallclock secs}; $1'], <<EOF, <<EOF],
+     [["-e", 'm{(\d+) wallclock secs}; $1'], <<EOF, <<EOF, 1, 1],
 Files=1, Tests=3,  3 wallclock secs ( 0.02 usr  0.02 sys +  0.09 cusr  0.01 csys =  0.14 CPU)
 Files=1, Tests=3,  0 wallclock secs ( 0.02 usr  0.02 sys +  0.09 cusr  0.01 csys =  0.14 CPU)
 Files=1, Tests=3,  2 wallclock secs ( 0.02 usr  0.02 sys +  0.09 cusr  0.01 csys =  0.14 CPU)
@@ -203,7 +207,7 @@ Files=1, Tests=3,  2 wallclock secs ( 0.02 usr  0.02 sys +  0.09 cusr  0.01 csys
 Files=1, Tests=3,  3 wallclock secs ( 0.02 usr  0.02 sys +  0.09 cusr  0.01 csys =  0.14 CPU)
 EOF
 
-     [["-C", '$a cmp $b'], <<EOF, <<EOF],
+     [["-C", '$a cmp $b'], <<EOF, <<EOF, 1, 1],
 c
 b
 a
@@ -213,7 +217,7 @@ b
 c
 EOF
 
-     [["-v"], "", qr{^psort version \d+\.\d+(?:_\d+)?$}],
+     [["-v"], "", qr{^psort version \d+\.\d+(?:_\d+)?$}, 0, undef],
 
     );
 
@@ -224,7 +228,7 @@ my @erroneous_test_defs =
      [["--compare-function", 'perl compile error'], '', qr{Cannot compile}],
     );
 
-plan tests => 1 + 2 * (@test_defs + @erroneous_test_defs);
+plan tests => 1 + 4 * @test_defs + 2 * @erroneous_test_defs;
 
 ok -x $psort, 'psort is executable';
 
@@ -237,14 +241,16 @@ for my $test_def (@erroneous_test_defs) {
 }
 
 sub _run_psort {
-    my($expect_error, $args, $indata, $expected) = @_;
+    my($expect_error, $args, $indata, $expected, $checkable, $unsorted_in) = @_;
+    $args = [] if !$args;
+
     my($tmpfh,$tmpfile) = tempfile(UNLINK => 1, SUFFIX => ".dat")
 	or die $!;
     print $tmpfh $indata;
     close $tmpfh
 	or die $!;
 
-    my @cmd = ($psort, $args ? @$args : (), $tmpfile);
+    my @sort_cmd  = ($psort, @$args, $tmpfile);
 
     my $buf;
     my $cmd_res;
@@ -254,13 +260,13 @@ sub _run_psort {
 	    skip "Can't run stderr tests without IPC::Run", 2
 		if !eval { require IPC::Run; 1 };
 
-	    $cmd_res = IPC::Run::run(\@cmd, "2>", \$buf);
+	    $cmd_res = IPC::Run::run(\@sort_cmd, "2>", \$buf);
 	} else {
 	    my $fh;
 	    if ($] < 5.008) {
-		open $fh, "-|" or exec @cmd;
+		open $fh, "-|" or exec @sort_cmd;
 	    } else {
-		open $fh, "-|", @cmd
+		open $fh, "-|", @sort_cmd
 		    or die $!;
 	    }
 	    while(<$fh>) {
@@ -271,10 +277,10 @@ sub _run_psort {
 
 	if ($expect_error) {
 	    ok !$cmd_res, 'Expected failure'
-		or diag "While running '@cmd'";
+		or diag "While running '@sort_cmd'";
 	} else {
 	    ok $cmd_res, 'Expected success'
-		or diag "While running '@cmd': $?";
+		or diag "While running '@sort_cmd': $?";
 	}
 
 	my $testlabel = !defined $args ? '<no args>' : "args: <@$args>";
@@ -283,12 +289,46 @@ sub _run_psort {
 	} else {
 	    eq_or_diff $buf, $expected, $testlabel;
 	}
+
+	if (!$expect_error) {
+	SKIP: {
+		skip "This test case is not checkable", 2
+		    if !$checkable;
+
+		# Check input data
+		{
+		    my @check_args = (@$args, (rand(2) < 1 ? '--check' : '-c'));
+		    my @check_cmd = ($psort, @check_args, $tmpfile);
+		    system @check_cmd;
+		    my $ret = $?>>8;
+		    is $ret, $unsorted_in, "Check command with args <@check_args> returned $ret (in data)";
+		}
+
+		# Check sorted data
+		{
+		    my($tmpsortfh,$tmpsortfile) = tempfile(UNLINK => 1, SUFFIX => '.dat')
+			or die $!;
+		    print $tmpsortfh $buf;
+		    close $tmpsortfh
+			or die $!;
+
+		    my @check_args = (@$args, (rand(2) < 1 ? '--check' : '-c'));
+		    my @check_cmd = ($psort, @check_args, $tmpsortfile);
+		    system @check_cmd;
+		    is $?, 0, "Check command with args <@check_args> returned $? (sorted data)";
+
+		    unlink $tmpsortfile;
+		}
+	    }
+	}
     }
+
+    unlink $tmpfile;
 }
 
 sub run_psort {
-    my($args, $indata, $expected) = @_;
-    _run_psort(0, $args, $indata, $expected);
+    my($args, $indata, $expected, $checkable, $unsorted_in) = @_;
+    _run_psort(0, $args, $indata, $expected, $checkable, $unsorted_in);
 }
 
 sub run_psort_erroneous {
