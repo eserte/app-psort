@@ -256,8 +256,13 @@ sub _run_psort {
 
 	    $cmd_res = IPC::Run::run(\@cmd, "2>", \$buf);
 	} else {
-	    open my $fh, "-|", @cmd
-		or die $!;
+	    my $fh;
+	    if ($] < 5.008) {
+		open $fh, "-|" or exec @cmd;
+	    } else {
+		open $fh, "-|", @cmd
+		    or die $!;
+	    }
 	    while(<$fh>) {
 		$buf .= $_;
 	    }
