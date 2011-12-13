@@ -39,6 +39,14 @@ b
 c
 EOF
 
+     [undef, "", "", 1, 0],
+
+     [undef, "\n", "\n", 1, 0],
+
+     [undef, "one line", "one line", 1, 0],
+
+     [undef, "one line\n", "one line\n", 1, 0],
+
      [["-r"], <<EOF, <<EOF, 1, 0],
 c
 b
