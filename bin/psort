@@ -147,7 +147,7 @@ sub add_psort {
     while(<$fh>) {
 	my $line = $_;
 	my $res = $cb->($_); # force scalar context
-	$res = lc $res            if $ignore_case;
+	$res = uc $res            if $ignore_case;
 	$res =~ s{^\s+}{}         if $ignore_leading_blanks;
 	$res =~ s{[[:^print]]}{}g if $ignore_nonprinting;
 	push @data, [$line, $res];
