@@ -263,7 +263,9 @@ my @erroneous_test_defs =
      [["--compare-function", 'perl compile error'], '', qr{Cannot compile}],
     );
 
-plan tests => 1 + 4 * @test_defs + 2 * @erroneous_test_defs;
+my $ok_test_count    = 4;
+my $error_test_count = 2;
+plan tests => 1 + $ok_test_count*@test_defs + $error_test_count*@erroneous_test_defs;
 
 SKIP: {
     skip "-x test does not work on Windows", 1
@@ -273,14 +275,14 @@ SKIP: {
 }
 
 for my $test_def (@test_defs) {
-    run_psort(@$test_def);
+    run_psort_testcase(@$test_def);
 }
 
 for my $test_def (@erroneous_test_defs) {
-    run_psort_erroneous(@$test_def);
+    run_psort_erroneous_testcase(@$test_def);
 }
 
-sub _run_psort {
+sub _run_psort_testcase {
     my($expect_error, $args, $indata, $expected, $checkable, $unsorted_in) = @_;
     $args = [] if !$args;
 
@@ -292,31 +294,14 @@ sub _run_psort {
 
     my @sort_cmd  = ($psort, @$args, $tmpfile);
 
-    my $buf = ''; # empty file = empty string!
-    my $cmd_res;
-
  SKIP: {
-	if ($expect_error) {
-	    skip "Can't run stderr tests without IPC::Run", 2
-		if !eval { require IPC::Run; 1 };
-
-	    $cmd_res = IPC::Run::run(\@sort_cmd, "2>", \$buf);
-	} else {
-	    my $fh;
-	    if ($^O eq 'MSWin32') {
-		open $fh, "-|", "@sort_cmd" # List form of pipe open not implemented
-		    or die "While running @sort_cmd: $!";
-	    } elsif ($] < 5.008) {
-		open $fh, "-|" or exec @sort_cmd;
-	    } else {
-		open $fh, "-|", @sort_cmd
-		    or die $!;
-	    }
-	    while(<$fh>) {
-		$buf .= $_;
-	    }
-	    $cmd_res = close $fh;
+	my $run_res = _run_psort(\@sort_cmd, $expect_error, undef);
+	if ($run_res->{error}) {
+	    skip $run_res->{error}, $expect_error ? $error_test_count : $ok_test_count;
 	}
+	
+	my $cmd_res = $run_res->{cmdres};
+	my $buf     = $expect_error ? $run_res->{stderr} : $run_res->{stdout};
 
 	if ($expect_error) {
 	    ok !$cmd_res, 'Expected failure'
@@ -369,14 +354,51 @@ sub _run_psort {
     unlink $tmpfile;
 }
 
-sub run_psort {
+sub run_psort_testcase {
     my($args, $indata, $expected, $checkable, $unsorted_in) = @_;
-    _run_psort(0, $args, $indata, $expected, $checkable, $unsorted_in);
+    _run_psort_testcase(0, $args, $indata, $expected, $checkable, $unsorted_in);
 }
 
-sub run_psort_erroneous {
+sub run_psort_erroneous_testcase {
     my($args, $indata, $expected) = @_;
-    _run_psort(1, $args, $indata, $expected);
+    _run_psort_testcase(1, $args, $indata, $expected);
+}
+
+sub _run_psort {
+    my($sort_cmd, $get_stderr, $input_ref) = @_;
+
+    my $stdout = '';
+    my $stderr = '';
+    my $cmdres;
+
+    if (eval { require IPC::Run; 1 }) {
+	$cmdres = IPC::Run::run($sort_cmd, ">", \$stdout, "2>", \$stderr, ($input_ref ? ("<", $input_ref) : ()));
+    } else {
+	if ($get_stderr) {
+	    return { error => "Can't run stderr tests without IPC::Run" };
+	} elsif ($input_ref) {
+	    return { error => "Can't run stdin tests without IPC::Run" };
+	} elsif ($^O eq 'MSWin32') {
+	    return { error => "MSWin32 needs IPC::Run for tests because: List form of pipe open not implemented" };
+	} else {
+	    my $fh;
+	    if ($] < 5.008) {
+		open $fh, "-|" or exec @$sort_cmd;
+	    } else {
+		open $fh, "-|", @$sort_cmd
+		    or die "While running @$sort_cmd: $!";
+	    }
+	    while(<$fh>) {
+		$stdout .= $_;
+	    }
+	    $cmdres = close $fh;
+	}
+    }
+    return {
+	    cmdres => $cmdres,
+	    stdout => $stdout,
+	    stderr => $stderr,
+	   };
 }
 
 __END__
