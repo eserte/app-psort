@@ -265,7 +265,12 @@ my @erroneous_test_defs =
 
 plan tests => 1 + 4 * @test_defs + 2 * @erroneous_test_defs;
 
-ok -x $psort, 'psort is executable';
+SKIP: {
+    skip "-x test does not work on Windows", 1
+	if $^O eq 'MSWin32';
+
+    ok -x $psort, 'psort is executable';
+}
 
 for my $test_def (@test_defs) {
     run_psort(@$test_def);
@@ -298,7 +303,10 @@ sub _run_psort {
 	    $cmd_res = IPC::Run::run(\@sort_cmd, "2>", \$buf);
 	} else {
 	    my $fh;
-	    if ($] < 5.008) {
+	    if ($^O eq 'MSWin32') {
+		open $fh, "-|", "@sort_cmd" # List form of pipe open not implemented
+		    or die "While running @sort_cmd: $!";
+	    } elsif ($] < 5.008) {
 		open $fh, "-|" or exec @sort_cmd;
 	    } else {
 		open $fh, "-|", @sort_cmd
