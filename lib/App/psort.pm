@@ -15,7 +15,7 @@ package App::psort;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.01_55';
+$VERSION = '0.01_56';
 
 1;
 
