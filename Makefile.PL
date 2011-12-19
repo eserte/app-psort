@@ -24,7 +24,7 @@ WriteMakefile(
     EXE_FILES         => ['bin/psort'],
     LICENSE	      => 'perl',
     ($] >= 5.005 ?
-      (ABSTRACT_FROM  => 'bin/psort',
+      (ABSTRACT	      => 'a perl-enhanced sort',
        AUTHOR         => 'Slaven Rezic <srezic@cpan.org>') : ()),
     ($eumm_recent_enough ?
       (META_ADD => { resources => { repository => 'git://github.com/eserte/app-psort.git' } }) : ()),
