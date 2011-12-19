@@ -39,6 +39,24 @@ b
 c
 EOF
 
+    [undef, <<EOF, <<EOF, 1, 1],
+abc
+
+xyz
+EOF
+
+abc
+xyz
+EOF
+
+    [undef, <<EOF, <<EOF, 1, 1],
+\tTAB
+
+EOF
+
+\tTAB
+EOF
+
      [undef, "", "", 1, 0],
 
      [undef, "\n", "\n", 1, 0],
@@ -259,8 +277,8 @@ EOF
 my @erroneous_test_defs =
     (
      [["--invalid-option"], "", qr{usage}],
-     [["--field-function", 'perl compile error'], '', qr{Cannot compile}],
-     [["--compare-function", 'perl compile error'], '', qr{Cannot compile}],
+     [["--field-function", 'perl compile er{ror'], '', qr{Cannot compile}],
+     [["--compare-function", 'perl compile er{ror'], '', qr{Cannot compile}],
     );
 
 my $ok_test_count    = 4;
