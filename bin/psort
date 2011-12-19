@@ -46,21 +46,26 @@ GetOptions(
 	       exit 0;
 	   },
 	  ) or die <<EOF;
-usage: $0 [-n | -N | -V | -C ...] [-r] -e ...
+usage: $0 [OPTION]... [FILE]...
 
+Comparison functions:
+-C: compare using any perl code (\$a and \$b are defined)
 -n: compare numerically
 -N: compare using Sort::Naturally
 -V: compare versions
--C: compare using any perl code (\$a and \$b are defined)
--r: reverse sorting
--e: perl oneliner, should return the value to be compared as last value
--M: add perl modules
-EOF
 
-if ($cmp_perlscript) {
-    $sort_type = eval "sub { $cmp_perlscript }";
-    die "Cannot compile 'cmp' code: $@" if $@;
-}
+Sort key selection:
+-b: ignore leading blanks
+-e: perl oneliner, should return the value to be compared as last value
+-f: ignore case
+-i: ignore non-printing characters
+
+Misc:
+-c: check only
+-r: reverse sorting
+-M: load perl modules
+-v: print version
+EOF
 
 for my $module_spec (@modules) {
     my($module,$imports) = split /=/, $module_spec, 2;
@@ -73,9 +78,14 @@ for my $module_spec (@modules) {
     }
 }
 
+if ($cmp_perlscript) {
+    $sort_type = eval "no strict; sub { $cmp_perlscript }";
+    die "Cannot compile 'cmp' code: $@" if $@;
+}
+
 my @data;
 my $cb = defined $perlscript ? do {
-    my $sub = eval "sub { $perlscript }";
+    my $sub = eval "no strict; sub { $perlscript }";
     die "Cannot compile code: $@" if $@;
     $sub;
 } : sub { $_ };
@@ -150,6 +160,7 @@ sub add_psort {
 	$res = uc $res            if $ignore_case;
 	$res =~ s{^\s+}{}         if $ignore_leading_blanks;
 	$res =~ s{[[:^print]]}{}g if $ignore_nonprinting;
+	$res =~ s{\r?\n$}{}; # remove newline at end
 	push @data, [$line, $res];
     }
 }
@@ -162,7 +173,160 @@ psort - a perl-enhanced sort
 
 =head1 SYNOPSIS
 
-    psort [-n | -N | -V | -C '$a cmp $b'] [-r] -e '/...(...).../ && $1'
+    psort [OPTION]... [FILE]...
+
+=head1 DESCRIPTION
+
+A perl-enhanced variant of L<sort(1)>. The specified files (or
+standard input) are written sorted to standard output.
+
+By default, sorting is done using perl's L<< cmp|perlop/cmp >>
+operator, without any use of locales or encodings.
+
+=head2 OPTIONS
+
+=over
+
+=item -b, --ignore-leading-blanks
+
+Ignore any whitespace character (C<\s>) at the beginning of a line.
+
+=item -c, --check
+
+Do not output anything. Just check if the input is sorted and return
+the exit value 0 for sorted and 1 for unsorted.
+
+=item -C, --compare-function
+
+Sort using a custom perl function. For your convenience, the enclosing
+"sub {" and "}" must not be specified. Like in perl's sort,
+the variables C<$a> and C<$b> are available.
+
+Examples
+
+=over
+
+=item * Reimplementing the C<-n> switch:
+
+    -C '$a <=> $b'
+
+=item * Using locale comparisons:
+
+    -C 'use locale; $a cmp $b'
+
+=back
+
+Note that it is possible to put C<BEGIN { ... }> blocks into the
+comparison function.
+
+=item -c, --field-function
+
+Extract the sorting field (or the sorting key) using a custom perl
+function. For your convenience, the enclosing "sub {" and "}" must not
+be specified. The current line is available in the variable C<$_>. It
+is expected that the last expression is the field to be used for
+comparisons.
+
+Examples:
+
+=over
+
+=item * Using just the identity:
+
+    -e '$_'
+
+=item * Using only the first four characters for comparisons:
+
+    -e 'substr($_, 0, 4)'
+
+=item * Using a regular expression:
+
+    -e '/(\d+) wallclock/ && $1'
+
+=back
+
+Note that it is possible to put C<BEGIN { ... }> blocks into the
+comparison function.
+
+=item -f, --ignore-case
+
+Fold all characters to its uppercased version for comparison.
+
+=item -i, --ignore-nonprinting
+
+Ignore non-printing characters (everything matching the C<<
+[[:^print]] >> character class) for comparison.
+
+=item -Mmodule[=import]
+
+Load a perl module. The syntax is the same like perl's C<-M> option.
+
+=item -n, --numeric-sort
+
+Sort numerically. It is using perl's L<< <=>|perlop/<=> >> operator.
+
+=item -N, --natural-sort
+
+Sort using L<Sort::Naturally>, if available.
+
+=item -r, --reverse
+
+Reverse the result of comparisons.
+
+=item -v, --version
+
+Print psort's version.
+
+=item -V, --version-sort
+
+Sort versions using L<CPAN::Version>, if available.
+
+=back
+
+=head2 COMPATIBILITY
+
+Some options found in GNU/POSIX sort are also available in psort. But
+no attempt was done to make psort compatible to GNU/POSIX sort.
+Especially there's no locale support (but see above how to C<use
+locale> in the C<-C> option). There's also no encoding support (though
+it probably can be emulated by using C<<Encode/decode> in the C<-e> or
+C<-C> option).
+
+=head2 TODO
+
+Here are some ideas for future options:
+
+=over
+
+=item C<--encoding>
+
+Specify the input and output encoding.
+
+=item Unicode sorting
+
+An option to use L<Unicode::Collate>.
+
+Currently the longish one-liner has to be used:
+
+    psort -MUnicode::Collate -MEncode=decode -e 'decode("utf-8", $_)' -C 'BEGIN { $Collator = Unicode::Collate->new } $Collator->cmp($a,$b)'
+
+=item C<--locale>
+
+Specify a locale.
+
+=item C<-o>
+
+Instead writing to standard output, write to the specified output file.
+
+=item C<-m>
+
+Assume that input files are already sorted.
+
+=item C<-u>
+
+Output only unique lines.
+
+=back
 
 =head1 AUTHOR
 
@@ -178,7 +342,7 @@ at your option, any later version of Perl 5 you may have available.
 
 =head1 SEE ALSO
 
-L<sort(1)>, L<Sort::Naturally>.
+L<sort(1)>, L<Sort::Naturally>, L<CPAN::Version>.
 
 =cut
 
