@@ -16,7 +16,7 @@ use strict;
 use Getopt::Long;
 
 use vars qw($VERSION);
-$VERSION = "0.01_57";
+$VERSION = "0.02";
 
 my $sort_type = 'alpha';
 my $reverse;
