@@ -4,7 +4,7 @@
 #
 # Author: Slaven Rezic
 #
-# Copyright (C) 2009,2011 Slaven Rezic. All rights reserved.
+# Copyright (C) 2009,2011,2013 Slaven Rezic. All rights reserved.
 # This program is free software; you can redistribute it and/or
 # modify it under the same terms as Perl itself.
 #
@@ -16,7 +16,7 @@ use strict;
 use Getopt::Long;
 
 use vars qw($VERSION);
-$VERSION = "0.02";
+$VERSION = "0.03";
 
 my $sort_type = 'alpha';
 my $reverse;
@@ -219,7 +219,7 @@ Examples
 Note that it is possible to put C<BEGIN { ... }> blocks into the
 comparison function.
 
-=item -c, --field-function
+=item -e, --field-function
 
 Extract the sorting field (or the sorting key) using a custom perl
 function. For your convenience, the enclosing "sub {" and "}" must not
@@ -334,7 +334,7 @@ Slaven ReziE<x0107>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2009,2011 by Slaven ReziE<x0107>
+Copyright (C) 2009,2011,2013 by Slaven ReziE<x0107>
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,
