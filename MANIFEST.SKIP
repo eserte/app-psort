@@ -58,3 +58,4 @@
 #!end included /home/cpansand/var/ctps/5141RC1/install/perl-5.14.1-RC1/lib/5.14.1/ExtUtils/MANIFEST.SKIP
 
 ^App-psort-\d+
+^\.travis\.yml$
