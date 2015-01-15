@@ -23,6 +23,9 @@ BEGIN {
 
 my $psort = "$FindBin::RealBin/../blib/script/psort";
 
+# Special handling for systems without shebang handling
+my $full_script = $^O eq 'MSWin32' ? qq{"$^X" $psort} : $psort;
+
 my @test_defs =
     (# options
      #       in
@@ -310,7 +313,7 @@ sub _run_psort_testcase {
     close $tmpfh
 	or die $!;
 
-    my @sort_cmd  = ($psort, @$args, $tmpfile);
+    my @sort_cmd  = ($full_script, @$args, $tmpfile);
 
  SKIP: {
 	my $run_res = _run_psort(\@sort_cmd, $expect_error, undef);
@@ -344,7 +347,7 @@ sub _run_psort_testcase {
 		# Check input data
 		{
 		    my @check_args = (@$args, (rand(2) < 1 ? '--check' : '-c'));
-		    my @check_cmd = ($psort, @check_args, $tmpfile);
+		    my @check_cmd = ($full_script, @check_args, $tmpfile);
 		    system @check_cmd;
 		    my $ret = $?>>8;
 		    is $ret, $unsorted_in, "Check command with args <@check_args> returned $ret (in data)";
@@ -359,7 +362,7 @@ sub _run_psort_testcase {
 			or die $!;
 
 		    my @check_args = (@$args, (rand(2) < 1 ? '--check' : '-c'));
-		    my @check_cmd = ($psort, @check_args, $tmpsortfile);
+		    my @check_cmd = ($full_script, @check_args, $tmpsortfile);
 		    system @check_cmd;
 		    is $?, 0, "Check command with args <@check_args> returned $? (sorted data)";
 
