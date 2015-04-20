@@ -199,6 +199,33 @@ foo12z
 foo13a
 EOF
 
+     # -M without import list
+     [['-MSort::Naturally', '-C', 'ncmp($a, $b)', '-f'], <<EOF, <<EOF, 1, 1],
+foo12a
+foo12z
+foo13a
+foo
+14
+9x
+foo12
+fooa
+foolio
+Foolio
+Foo12a
+EOF
+9x
+14
+foo
+fooa
+foolio
+Foolio
+foo12
+foo12a
+Foo12a
+foo12z
+foo13a
+EOF
+
      [['-N', '-r'], <<EOF, <<EOF, 1, 1],
 foo12a
 foo12z
@@ -282,6 +309,8 @@ my @erroneous_test_defs =
      [["--invalid-option"], "", qr{usage}],
      [["--field-function", 'perl compile er{ror'], '', qr{Cannot compile}],
      [["--compare-function", 'perl compile er{ror'], '', qr{Cannot compile}],
+     [['-MThis::Module::Does::Not::Exist'], '', qr{Can't locate}],
+     [['-MSort::Naturally=', '-C', 'ncmp($a,$b)'], "first test line\nsecond test line\n", qr{Undefined subroutine}],
     );
 
 my $ok_test_count    = 4;
