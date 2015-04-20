@@ -3,7 +3,7 @@
 #
 # Author: Slaven Rezic
 #
-# Copyright (C) 2011,2013 Slaven Rezic. All rights reserved.
+# Copyright (C) 2011,2013,2015 Slaven Rezic. All rights reserved.
 # This package is free software; you can redistribute it and/or
 # modify it under the same terms as Perl itself.
 #
@@ -15,7 +15,7 @@ package App::psort;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.04';
+$VERSION = '0.05';
 
 1;
 
