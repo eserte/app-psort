@@ -21,10 +21,16 @@ BEGIN {
     *eq_or_diff = eval { require Test::Differences; \&Test::Differences::eq_or_diff } || \&Test::More::is;
 }
 
+my $use_blib = 1;
 my $psort = "$FindBin::RealBin/../blib/script/psort";
+unless (-f $psort) {
+    # blib version not available, use ../bin source version
+    $psort = "$FindBin::RealBin/../bin/psort";
+    $use_blib = 0;
+}
 
 # Special handling for systems without shebang handling
-my $full_script = $^O eq 'MSWin32' ? qq{"$^X" $psort} : $psort;
+my @full_script = $^O eq 'MSWin32' || !$use_blib ? ($^X, $psort) : ($psort);
 
 my @test_defs =
     (# options
@@ -342,14 +348,14 @@ sub _run_psort_testcase {
     close $tmpfh
 	or die $!;
 
-    my @sort_cmd  = ($full_script, @$args, $tmpfile);
+    my @sort_cmd  = (@full_script, @$args, $tmpfile);
 
  SKIP: {
 	my $run_res = _run_psort(\@sort_cmd, $expect_error, undef);
 	if ($run_res->{error}) {
 	    skip $run_res->{error}, $expect_error ? $error_test_count : $ok_test_count;
 	}
-	
+
 	my $cmd_res = $run_res->{cmdres};
 	my $buf     = $expect_error ? $run_res->{stderr} : $run_res->{stdout};
 
@@ -376,7 +382,7 @@ sub _run_psort_testcase {
 		# Check input data
 		{
 		    my @check_args = (@$args, (rand(2) < 1 ? '--check' : '-c'));
-		    my @check_cmd = ($full_script, @check_args, $tmpfile);
+		    my @check_cmd = (@full_script, @check_args, $tmpfile);
 		    system @check_cmd;
 		    my $ret = $?>>8;
 		    is $ret, $unsorted_in, "Check command with args <@check_args> returned $ret (in data)";
@@ -391,7 +397,7 @@ sub _run_psort_testcase {
 			or die $!;
 
 		    my @check_args = (@$args, (rand(2) < 1 ? '--check' : '-c'));
-		    my @check_cmd = ($full_script, @check_args, $tmpsortfile);
+		    my @check_cmd = (@full_script, @check_args, $tmpsortfile);
 		    system @check_cmd;
 		    is $?, 0, "Check command with args <@check_args> returned $? (sorted data)";
 
