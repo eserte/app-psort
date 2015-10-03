@@ -178,6 +178,33 @@ foo12z
 foo13a
 EOF
 
+     # -m works, too
+     [['-mSort::Naturally=ncmp', '-C', 'ncmp($a, $b)', '-f'], <<EOF, <<EOF, 1, 1],
+foo12a
+foo12z
+foo13a
+foo
+14
+9x
+foo12
+fooa
+foolio
+Foolio
+Foo12a
+EOF
+9x
+14
+foo
+fooa
+foolio
+Foolio
+foo12
+foo12a
+Foo12a
+foo12z
+foo13a
+EOF
+
      # BEGIN blocks work, too
      [['-C', 'BEGIN { use Sort::Naturally qw(ncmp) } ncmp($a, $b)', '-f'], <<EOF, <<EOF, 1, 1],
 foo12a

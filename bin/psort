@@ -41,6 +41,9 @@ GetOptions(
 	   "c|check"              => \$check,
 	   "e|field-function=s"   => \$perlscript,
 	   'M|module=s@'          => \@modules,
+	   'm=s@'                 => sub {
+               push @modules, $_[1] =~ /=/ ? $_[1] : "$_[1]=";
+           },
 	   "v|version"            => sub {
 	       print "psort version $VERSION\n";
 	       exit 0;
@@ -64,6 +67,7 @@ Misc:
 -c: check only
 -r: reverse sorting
 -M: load perl modules
+-m: load perl modules (without importing)
 -v: print version
 EOF
 
@@ -267,6 +271,11 @@ Ignore non-printing characters (everything matching the C<<
 
 Load a perl module. The syntax is the same like perl's C<-M> option.
 
+=item -mmodule[=import]
+
+Load a perl module without default import. The syntax is the same like perl's
+C<-M> option.
+
 =item -n, --numeric-sort
 
 Sort numerically. It is using perl's L<< <=>|perlop/<=> >> operator.
@@ -351,5 +360,3 @@ at your option, any later version of Perl 5 you may have available.
 L<sort(1)>, L<Sort::Naturally>, L<CPAN::Version>.
 
 =cut
-
-
