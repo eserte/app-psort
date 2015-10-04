@@ -1,5 +1,9 @@
 Revision history for psort.
 
+0.06	2015-10-04
+	- -m option (provided by perlancar)
+	- "prove -l" works now without a blib (provided by perlancar)
+
 0.05	2015-04-20
 	- -M option behaves like perl's regarding missing import list
 
