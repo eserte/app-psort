@@ -1,0 +1,10 @@
+install:
+  - set PROJECTNAME=App-psort
+  - cinst strawberryperl
+  - set PATH=C:\strawberry\perl\bin;C:\strawberry\perl\site\bin;C:\strawberry\c\bin;%PATH%
+  - cd C:\projects\%PROJECTNAME%
+  - cpanm --installdeps .
+
+build_script:
+  - perl Makefile.PL
+  - dmake test
