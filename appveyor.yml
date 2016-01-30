@@ -1,3 +1,8 @@
+branches:
+  except:
+    - /travis/
+skip_tags: true
+
 install:
   - set PROJECTNAME=App-psort
   - cinst strawberryperl

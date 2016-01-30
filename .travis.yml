@@ -1,3 +1,6 @@
+branches:
+ except:
+  - /appveyor/
 language: perl
 perl:
   - "5.20"
