@@ -3,6 +3,7 @@ branches:
   - /appveyor/
 language: perl
 perl:
+  - "5.22"
   - "5.20"
   - "5.18"
   - "5.16"
