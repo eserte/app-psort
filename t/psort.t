@@ -333,6 +333,42 @@ b
 c
 EOF
 
+     [["-u"], <<EOF, <<EOF, 1, 1],
+c
+b
+c
+a
+b
+EOF
+a
+b
+c
+EOF
+
+     [["-u", "-e", 'substr($_,0,1)'], <<EOF, <<EOF, 1, 1],
+c1
+b1
+c2
+a1
+b2
+EOF
+a1
+b1
+b2
+c1
+c2
+EOF
+
+     [["-u"], <<EOF, <<EOF, 1, 0],
+a
+b
+c
+EOF
+a
+b
+c
+EOF
+
      [["-v"], "", qr{^psort version \d+\.\d+(?:_\d+)?$}, 0, undef],
 
     );
