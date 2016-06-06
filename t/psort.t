@@ -369,6 +369,23 @@ b
 c
 EOF
 
+     # non-printables
+     [[], <<EOF, <<EOF, 1, 1],
+aa
+a\7a
+EOF
+a\7a
+aa
+EOF
+
+     [["-i"], <<EOF, <<EOF, 1, 0],
+aa
+a\7a
+EOF
+aa
+a\7a
+EOF
+
      [["-v"], "", qr{^psort version \d+\.\d+(?:_\d+)?$}, 0, undef],
 
     );
