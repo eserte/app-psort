@@ -1,6 +1,3 @@
-branches:
- except:
-  - /appveyor/
 language: perl
 perl:
   - "5.22"
@@ -11,4 +8,8 @@ perl:
   - "5.12"
   - "5.10"
   - "5.8"
+
+branches:
+ except:
+  - /appveyor/
 sudo: false
