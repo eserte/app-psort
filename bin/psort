@@ -378,4 +378,6 @@ at your option, any later version of Perl 5 you may have available.
 
 L<sort(1)>, L<Sort::Naturally>, L<CPAN::Version>.
 
+An alternative perl-enhanced sort program: L<subsort> (in L<App::subsort>).
+
 =cut
