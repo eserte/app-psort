@@ -386,6 +386,33 @@ aa
 a\7a
 EOF
 
+     # keep-initial-lines
+     [["--keep-initial-lines"], <<EOF, <<EOF, 0, undef],
+header1
+z
+a
+m
+EOF
+header1
+a
+m
+z
+EOF
+
+     [["--keep-initial-lines=2", "-n"], <<EOF, <<EOF, 0, undef],
+header1
+header2
+3
+1
+2
+EOF
+header1
+header2
+1
+2
+3
+EOF
+
      [["-v"], "", qr{^psort version \d+\.\d+(?:_\d+)?$}, 0, undef],
 
     );

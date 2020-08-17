@@ -46,6 +46,7 @@ GetOptions(
 	   'm=s@'                 => sub {
                push @modules, $_[1] =~ /=/ ? $_[1] : "$_[1]=";
            },
+	   'keep-initial-lines:i' => \my $keep_initial_lines,
 	   "v|version"            => sub {
 	       print "psort version $VERSION\n";
 	       exit 0;
@@ -73,6 +74,11 @@ Misc:
 -m: load perl modules (without importing)
 -v: print version
 EOF
+
+if (defined $keep_initial_lines && $keep_initial_lines == 0) { $keep_initial_lines = 1 }
+if ($check && $keep_initial_lines) {
+    die "--check and --keep-initial-lines are incompatible\n";
+}
 
 for my $module_spec (@modules) {
     my($module,$imports) = split /=/, $module_spec, 2;
@@ -104,10 +110,17 @@ my $cb = defined $perlscript ? do {
 } : sub { $_ };
 
 if (@ARGV) {
+    my $is_first = 1;
     for my $file (@ARGV) {
-	add_psort(do { open my $fh, $file or die "Can't open $file: $!"; $fh });
+	open my $fh, $file or die "Can't open $file: $!";
+	if ($is_first) {
+	    keep_initial_lines($fh);
+	    $is_first = 0;
+	}
+	add_psort($fh);
     }
 } else {
+    keep_initial_lines(\*STDIN);
     add_psort(\*STDIN);
 }
 
@@ -185,6 +198,15 @@ sub add_psort {
 	$res =~ s{[[:^print:]]}{}g if $ignore_nonprinting;
 	$res =~ s{\r?\n$}{}; # remove newline at end
 	push @data, [$line, $res];
+    }
+}
+
+sub keep_initial_lines {
+    my($fh) = @_;
+    if ($keep_initial_lines) {
+	for (1..$keep_initial_lines) {
+	    print scalar <$fh>;
+	}
     }
 }
 
