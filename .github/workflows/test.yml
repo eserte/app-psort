@@ -59,6 +59,8 @@ jobs:
             deps: yes
           - perlimage: 5.22.4-stretch
             deps: yes
+          - perlimage: 5.36.0-slim-bullseye
+            deps: yes
     steps:
     - uses: actions/checkout@v2
     - name: Install dependencies
