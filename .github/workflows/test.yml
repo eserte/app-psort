@@ -25,7 +25,7 @@ jobs:
         sudo rm -f /etc/apt/sources.list.d/*.list
         sudo apt-get update -qq
       if: "startsWith(matrix.os, 'ubuntu-')"
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: "perl dependency installation (ubuntu)"
       run: |
         sudo apt-get install -q --no-install-recommends -y cpanminus
@@ -62,7 +62,7 @@ jobs:
           - perlimage: 5.36.0-slim-bullseye
             deps: yes
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Install dependencies
       # Note: currently dependencies must be installed; the test suite does not skip correctly on missing Sort::Naturally
       run: |
