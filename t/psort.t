@@ -313,14 +313,26 @@ EOF
 1.0
 EOF
 
-     [["-e", 'm{(\d+) wallclock secs}; $1'], <<EOF, <<EOF, 1, 1],
+     [["-n", "-e", 'm{(\d+) wallclock secs}; $1'], <<EOF, <<EOF, 1, 1],
 Files=1, Tests=3,  3 wallclock secs ( 0.02 usr  0.02 sys +  0.09 cusr  0.01 csys =  0.14 CPU)
 Files=1, Tests=3,  0 wallclock secs ( 0.02 usr  0.02 sys +  0.09 cusr  0.01 csys =  0.14 CPU)
 Files=1, Tests=3,  2 wallclock secs ( 0.02 usr  0.02 sys +  0.09 cusr  0.01 csys =  0.14 CPU)
+Files=1, Tests=3, 11 wallclock secs (10.02 usr  0.02 sys +  0.09 cusr  0.01 csys = 10.14 CPU)
 EOF
 Files=1, Tests=3,  0 wallclock secs ( 0.02 usr  0.02 sys +  0.09 cusr  0.01 csys =  0.14 CPU)
 Files=1, Tests=3,  2 wallclock secs ( 0.02 usr  0.02 sys +  0.09 cusr  0.01 csys =  0.14 CPU)
 Files=1, Tests=3,  3 wallclock secs ( 0.02 usr  0.02 sys +  0.09 cusr  0.01 csys =  0.14 CPU)
+Files=1, Tests=3, 11 wallclock secs (10.02 usr  0.02 sys +  0.09 cusr  0.01 csys = 10.14 CPU)
+EOF
+
+     [["-e", 'substr $_, 4'], <<EOF, <<EOF, 1, 1],
+xxx c
+zzz b
+yyy a
+EOF
+yyy a
+zzz b
+xxx c
 EOF
 
      [["-C", '$a cmp $b'], <<EOF, <<EOF, 1, 1],
