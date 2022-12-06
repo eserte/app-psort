@@ -16,7 +16,7 @@ use strict;
 use Getopt::Long;
 
 use vars qw($VERSION);
-$VERSION = "0.09_50";
+$VERSION = "0.10";
 
 
 sub _has_capture_groups {
