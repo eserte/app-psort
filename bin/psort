@@ -121,7 +121,20 @@ if (defined $perlscript) {
 	$qr = eval { qr{($rx)} };
 	die $@ if $@; # should not happen
     }
-    $cb = sub { $_ =~ $qr; $1 };
+    if ($rx =~ m{^/(.*)/$}) {
+	my $rx_without_slashes = $1;
+	my $warned_about_slashes;
+	$cb = sub {
+	    $_ =~ $qr;
+	    if (!$warned_about_slashes && !defined $1) {
+		warn "No regexp match. Maybe you want to omit the slashes, i.e. use --rx '$rx_without_slashes'?\n";
+		$warned_about_slashes = 1;
+	    }
+	    $1;
+	};
+    } else {
+	$cb = sub { $_ =~ $qr; $1 };
+    }
 } else {
     $cb = sub { $_ };
 }
