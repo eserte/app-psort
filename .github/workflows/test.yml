@@ -73,7 +73,7 @@ jobs:
     - name: Install optional dependencies
       run: |
         set -e
-        cpanm --quiet --installdeps --notest IPC::Run Test::Differences || ( cat ~/.cpanm/work/*/build.log; false )
+        cpanm --quiet --notest IPC::Run Test::Differences || ( cat ~/.cpanm/work/*/build.log; false )
       if: matrix.deps
     - name: Build and test
       run: |
