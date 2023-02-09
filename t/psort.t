@@ -349,6 +349,22 @@ EOF
 	 )
      },
 
+     do {
+	 my $in = <<EOF;
+xxx 3
+zzz 2
+yyy 1
+EOF
+	 my $out = <<EOF;
+yyy 1
+zzz 2
+xxx 3
+EOF
+	 (
+	  [["-n", "--rx", '\d+'], $in, $out, 1, 1],
+	 )
+     },
+
      [["-C", '$a cmp $b'], <<EOF, <<EOF, 1, 1],
 c
 b

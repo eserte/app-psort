@@ -121,7 +121,7 @@ if (defined $perlscript) {
 	$qr = eval { qr{($rx)} };
 	die $@ if $@; # should not happen
     }
-    $cb = sub { m{$rx}; $1 };
+    $cb = sub { $_ =~ $qr; $1 };
 } else {
     $cb = sub { $_ };
 }
