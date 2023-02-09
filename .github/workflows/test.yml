@@ -29,7 +29,7 @@ jobs:
     - name: "perl dependency installation (ubuntu)"
       run: |
         sudo apt-get install -q --no-install-recommends -y cpanminus
-        cpanm --sudo --quiet --installdeps --notest .
+        cpanm --sudo --quiet --installdeps --notest . || ( cat ~/.cpanm/work/*/build.log; false )
       if: "startsWith(matrix.os, 'ubuntu-')"
     - name: Build and test
       run: |
@@ -39,36 +39,42 @@ jobs:
       if: "!startsWith(matrix.os,'windows-')"
 
   test_in_container:
-    name: Test with perl ${{ matrix.perlimage }} (deps=${{ matrix.deps }})
+    name: Test with perl ${{ matrix.perlimage }} (deps=${{ matrix.deps||'false' }}, optional_deps=${{ matrix.optional_deps||'false' }})
     runs-on: ubuntu-latest
     container: perl:${{ matrix.perlimage }}
     strategy:
       matrix:
         include:
           - perlimage: 5.8.9-threaded-stretch
-            deps: yes
+            deps: true
           - perlimage: 5.10.1-buster
-            deps: yes
+            deps: true
           - perlimage: 5.12.5-stretch
-            deps: yes
+            deps: true
           - perlimage: 5.14.4-stretch
-            deps: yes
+            deps: true
           - perlimage: 5.16.3-buster
-            deps: yes
+            deps: true
           - perlimage: 5.18.4-buster
-            deps: yes
+            deps: true
           - perlimage: 5.22.4-stretch
-            deps: yes
+            deps: true
           - perlimage: 5.36.0-slim-bullseye
-            deps: yes
+            deps: true
+            optional_deps: true
     steps:
     - uses: actions/checkout@v3
     - name: Install dependencies
       # Note: currently dependencies must be installed; the test suite does not skip correctly on missing Sort::Naturally
       run: |
         set -e
-        cpanm --quiet --installdeps --notest . || ( cat /github/home/.cpanm/work/*/build.log; false )
-      if: "matrix.deps == 'yes'"
+        cpanm --quiet --installdeps --notest . || ( cat ~/.cpanm/work/*/build.log; false )
+      if: matrix.deps
+    - name: Install optional dependencies
+      run: |
+        set -e
+        cpanm --quiet --installdeps --notest IPC::Run Test::Differences || ( cat ~/.cpanm/work/*/build.log; false )
+      if: matrix.deps
     - name: Build and test
       run: |
         set -e
