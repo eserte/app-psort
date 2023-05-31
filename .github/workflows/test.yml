@@ -80,4 +80,4 @@ jobs:
       run: |
         set -e
         perl Makefile.PL
-        HARNESS_TIMER=1 HARNESS_OPTIONS=j4:c make test
+        HARNESS_TIMER=1 HARNESS_OPTIONS=j4:c make disttest
