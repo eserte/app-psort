@@ -63,6 +63,8 @@ jobs:
           - perlimage: 5.36.0-slim-bullseye
             deps: true
             optional_deps: true
+          - perlimage: 5.38.0-slim-bookworm
+            deps: true
     steps:
     - uses: actions/checkout@v3
     - name: Install dependencies
