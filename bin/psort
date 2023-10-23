@@ -405,7 +405,7 @@ Some options found in GNU/POSIX sort are also available in psort. But
 no attempt was done to make psort compatible to GNU/POSIX sort.
 Especially there's no locale support (but see above how to C<use
 locale> in the C<-C> option). There's also no encoding support (though
-it probably can be emulated by using C<<Encode/decode> in the C<-e> or
+it probably can be emulated by using C<Encode::decode> in the C<-e> or
 C<-C> option).
 
 =head2 TODO
