@@ -67,6 +67,8 @@ jobs:
             deps: true
           - perlimage: 5.40.0-slim-bookworm
             deps: true
+          - perlimage: 5.42.0-slim-bookworm
+            deps: true
     steps:
     - name: apt hacks
       run: |
