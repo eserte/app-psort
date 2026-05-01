@@ -17,9 +17,13 @@ install:
   - if %perl%==strawberryperl ( if not exist "C:\strawberry" cinst strawberryperl )
   - if %perl%==strawberryperl   set PATH=C:\strawberry\perl\bin;C:\strawberry\perl\site\bin;C:\strawberry\c\bin;%PATH%
   - if not %perl%==cygwinperl perl -v
+  - if not %perl%==cygwinperl perl -V
+  - git config --list
   - cd C:\projects\%APPVEYOR_PROJECT_NAME%
   - if %perl%==activeperl       ppm install dmake
   - if %perl%==strawberryperl   cpanm --installdeps .
+  - if %perl%==strawberryperl   perl -MIPC::Run -e "print 'IPC::Run version: ', $IPC::Run::VERSION, \"\n\""
+  - if %perl%==strawberryperl   perl -MSort::Naturally -e "print 'Sort::Naturally version: ', $Sort::Naturally::VERSION, \"\n\""
 
 build_script:
   - perl Makefile.PL
