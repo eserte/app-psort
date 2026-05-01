@@ -36,10 +36,12 @@ jobs:
       if: "startsWith(matrix.os, 'ubuntu-')"
     - name: "perl dependency installation (windows)"
       run: |
-        cpanm --quiet --installdeps --notest . || ( cat /c/Users/runneradmin/.cpanm/work/*/build.log; false )
-        cpanm --quiet --notest IPC::Run Test::Differences || ( cat /c/Users/runneradmin/.cpanm/work/*/build.log; false )
+        cpanm --quiet --installdeps --notest .
+        if ($LASTEXITCODE -ne 0) { Get-ChildItem -Path "$env:USERPROFILE\.cpanm\work\" -Filter build.log -Recurse | Get-Content; exit 1 }
+        cpanm --quiet --notest IPC::Run Test::Differences
+        if ($LASTEXITCODE -ne 0) { Get-ChildItem -Path "$env:USERPROFILE\.cpanm\work\" -Filter build.log -Recurse | Get-Content; exit 1 }
       if: "startsWith(matrix.os, 'windows-')"
-      shell: bash
+      shell: pwsh
     - name: Diagnostics
       run: |
         perl -V
@@ -51,13 +53,14 @@ jobs:
         perl Makefile.PL
         HARNESS_TIMER=1 HARNESS_OPTIONS=j4:c make test
       if: "!startsWith(matrix.os,'windows-')"
+      shell: bash
     - name: Build and test (windows)
       run: |
-        set -e
         perl Makefile.PL
-        make test
+        $env:HARNESS_TIMER=1
+        gmake test
       if: "startsWith(matrix.os,'windows-')"
-      shell: bash
+      shell: pwsh
 
   test_in_container:
     name: Test with perl ${{ matrix.perlimage }} (deps=${{ matrix.deps||'false' }}, optional_deps=${{ matrix.optional_deps||'false' }})
