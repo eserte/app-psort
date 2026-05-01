@@ -22,8 +22,6 @@ install:
   - cd C:\projects\%APPVEYOR_PROJECT_NAME%
   - if %perl%==activeperl       ppm install dmake
   - if %perl%==strawberryperl   cpanm --installdeps .
-  - if %perl%==strawberryperl   perl -MIPC::Run -e "print 'IPC::Run version: ', $IPC::Run::VERSION, \"\n\""
-  - if %perl%==strawberryperl   perl -MSort::Naturally -e "print 'Sort::Naturally version: ', $Sort::Naturally::VERSION, \"\n\""
 
 build_script:
   - perl Makefile.PL
