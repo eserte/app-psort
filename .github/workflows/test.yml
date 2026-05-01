@@ -36,8 +36,8 @@ jobs:
       if: "startsWith(matrix.os, 'ubuntu-')"
     - name: "perl dependency installation (windows)"
       run: |
-        cpanm --quiet --installdeps --notest .
-        cpanm --quiet --notest IPC::Run Test::Differences
+        cpanm --quiet --installdeps --notest . || ( cat /c/Users/runneradmin/.cpanm/work/*/build.log; false )
+        cpanm --quiet --notest IPC::Run Test::Differences || ( cat /c/Users/runneradmin/.cpanm/work/*/build.log; false )
       if: "startsWith(matrix.os, 'windows-')"
       shell: bash
     - name: Diagnostics
