@@ -63,34 +63,36 @@ jobs:
       shell: pwsh
 
   test_in_container:
-    name: Test with perl ${{ matrix.perlimage }} (deps=${{ matrix.deps||'false' }}, optional_deps=${{ matrix.optional_deps||'false' }})
+    name: ${{ matrix.image }} (deps=${{ matrix.deps||'false' }}, optional_deps=${{ matrix.optional_deps||'false' }})
     runs-on: ubuntu-latest
-    container: perl:${{ matrix.perlimage }}
+    container: ${{ matrix.image }}
     strategy:
       matrix:
         include:
-          - perlimage: 5.8.9-threaded-stretch
+          - image: perl:5.8.9-threaded-stretch
             deps: true
-          - perlimage: 5.10.1-buster
+          - image: perl:5.10.1-buster
             deps: true
-          - perlimage: 5.12.5-stretch
+          - image: perl:5.12.5-stretch
             deps: true
-          - perlimage: 5.14.4-stretch
+          - image: perl:5.14.4-stretch
             deps: true
-          - perlimage: 5.16.3-buster
+          - image: perl:5.16.3-buster
             deps: true
-          - perlimage: 5.18.4-buster
+          - image: perl:5.18.4-buster
             deps: true
-          - perlimage: 5.22.4-stretch
+          - image: perl:5.22.4-stretch
             deps: true
-          - perlimage: 5.36.0-slim-bullseye
+          - image: perl:5.36.0-slim-bullseye
             deps: true
             optional_deps: true
-          - perlimage: 5.38.0-slim-bookworm
+          - image: perl:5.38.0-slim-bookworm
             deps: true
-          - perlimage: 5.40.0-slim-bookworm
+          - image: perl:5.40.0-slim-bookworm
             deps: true
-          - perlimage: 5.42.0-slim-bookworm
+          - image: perl:5.42.0-slim-bookworm
+            deps: true
+          - image: ubuntu:26.04
             deps: true
     steps:
     - name: apt hacks
@@ -105,6 +107,11 @@ jobs:
             ;;
         esac
     - uses: taiki-e/checkout-action@v1
+    - name: Install system dependencies
+      run: |
+        apt-get update -qq
+        apt-get install -q --no-install-recommends -y make perl cpanminus
+      if: "!startsWith(matrix.imager, 'perl')"
     - name: Install dependencies
       # Note: currently dependencies must be installed; the test suite does not skip correctly on missing Sort::Naturally
       run: |
