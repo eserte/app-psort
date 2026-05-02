@@ -5,6 +5,7 @@ MANIFEST
 MANIFEST.SKIP
 t/00-diagnostics.t
 t/psort.t
+t/repro_ipc_run.t
 t/rx_capture_groups.t
 t/version_check.t
 Changes
