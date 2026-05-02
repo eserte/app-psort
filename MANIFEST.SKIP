@@ -63,3 +63,4 @@
 
 ^\.github/
 ^\.prove$
+^xt/

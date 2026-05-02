@@ -1,12 +1,10 @@
-Changes
-MANIFEST
-MANIFEST.SKIP
-Makefile.PL
-README
 bin/psort
 lib/App/psort.pm
-t/00-diagnostics.t
+Makefile.PL
+MANIFEST
+MANIFEST.SKIP
 t/psort.t
-t/repro_ipc_run.t
 t/rx_capture_groups.t
 t/version_check.t
+Changes
+README

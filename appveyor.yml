@@ -25,4 +25,4 @@ install:
 
 build_script:
   - perl Makefile.PL
-  - '%make% test'
+  - '%make% test PROVE_OPTIONS="-r xt/"'
