@@ -4,6 +4,7 @@ Makefile.PL
 MANIFEST
 MANIFEST.SKIP
 t/psort.t
+t/rx_capture_groups.t
 t/version_check.t
 Changes
 README

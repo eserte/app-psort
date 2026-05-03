@@ -609,7 +609,7 @@ sub _run_psort {
     my $cmdres;
 
     if (eval { require IPC::Run; 1 }) {
-	$cmdres = IPC::Run::run($sort_cmd, ">", \$stdout, "2>", \$stderr, ($input_ref ? ("<", $input_ref) : ()));
+	$cmdres = IPC::Run::run($sort_cmd, ">", IPC::Run::binary(0), \$stdout, "2>", IPC::Run::binary(0), \$stderr, ($input_ref ? ("<", $input_ref) : ()));
     } else {
 	if ($get_stderr) {
 	    return { error => "Can't run stderr tests without IPC::Run" };

@@ -60,3 +60,7 @@
 ^App-psort-\d+
 ^\.travis\.yml$
 ^appveyor.yml$
+
+^\.github/
+^\.prove$
+^xt/
