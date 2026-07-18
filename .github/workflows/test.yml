@@ -92,6 +92,8 @@ jobs:
             deps: true
           - image: perl:5.42.0-slim-bookworm
             deps: true
+          - image: perl:5.44.0-slim-trixie
+            deps: true
           - image: ubuntu:26.04
             deps: true
     steps:
