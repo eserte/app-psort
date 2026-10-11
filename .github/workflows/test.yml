@@ -19,6 +19,7 @@ jobs:
        include:
          - os: 'ubuntu-22.04'
          - os: 'ubuntu-24.04'
+         - os: 'ubuntu-26.04'
          - os: 'windows-2022'
          - os: 'windows-2025'
     steps:
@@ -83,7 +84,7 @@ jobs:
             deps: true
           - image: perl:5.22.4-stretch
             deps: true
-          - image: perl:5.36.0-slim-bullseye
+          - image: perl:5.36.0-slim-buster
             deps: true
             optional_deps: true
           - image: perl:5.38.0-slim-bookworm
@@ -93,8 +94,6 @@ jobs:
           - image: perl:5.42.0-slim-bookworm
             deps: true
           - image: perl:5.44.0-slim-trixie
-            deps: true
-          - image: ubuntu:26.04
             deps: true
     steps:
     - name: apt hacks
